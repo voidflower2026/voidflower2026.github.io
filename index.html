@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>語音佛典</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8d08a;
+  --dark: #100c05;
+  --dark-mid: #1e1608;
+  --dark-light: #2e2210;
+  --dark-hover: #3a2c14;
+  --text: #f0e6c8;
+  --text-dim: #a89868;
+  --border: #3d2e15;
+}
+
+body {
+  font-family: 'Noto Serif TC', '宋體', '新細明體', serif;
+  background: var(--dark);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+header {
+  background: var(--dark-mid);
+  border-bottom: 2px solid var(--gold);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.site-title {
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: 6px;
+  font-weight: 700;
+}
+.site-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  margin-top: 3px;
+}
+.header-deco {
+  font-size: 28px;
+  margin-right: 4px;
+}
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 300px;
+  min-width: 240px;
+  background: var(--dark-mid);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.search-wrap {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.search-wrap input {
+  width: 100%;
+  background: var(--dark-light);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 9px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+}
+.search-wrap input::placeholder { color: var(--text-dim); }
+.search-wrap input:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 2px rgba(201,168,76,0.15); }
+
+.count-bar {
+  padding: 7px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 1px;
+}
+.scripture-list {
+  overflow-y: auto;
+  flex: 1;
+}
+.scripture-item {
+  padding: 14px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: background 0.15s;
+}
+.scripture-item:hover { background: var(--dark-hover); }
+.scripture-item.active {
+  background: var(--dark-light);
+  border-left-color: var(--gold);
+}
+.item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.item-title { font-size: 15px; color: var(--text); line-height: 1.5; }
+.item-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; letter-spacing: 1px; }
+.no-results { padding: 28px 16px; text-align: center; color: var(--text-dim); font-size: 14px; }
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 40px;
+  background: var(--dark);
+}
+
+/* Welcome */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  text-align: center;
+}
+.welcome-lotus { font-size: 72px; margin-bottom: 20px; opacity: 0.85; }
+.welcome h2 {
+  font-size: 30px;
+  color: var(--gold);
+  letter-spacing: 8px;
+  margin-bottom: 16px;
+}
+.welcome p { color: var(--text-dim); font-size: 15px; line-height: 2.2; letter-spacing: 1px; }
+
+/* Scripture page */
+.scripture-page { max-width: 780px; margin: 0 auto; }
+
+.page-header {
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 18px;
+  margin-bottom: 30px;
+}
+.page-header h1 {
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+.page-category {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+/* Part card */
+.part-card {
+  background: var(--dark-mid);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 26px 28px;
+  margin-bottom: 20px;
+}
+.part-label {
+  font-size: 15px;
+  color: var(--gold-light);
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.part-label::before { content: '◈'; color: var(--gold); }
+
+.audio-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+audio {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  accent-color: var(--gold);
+}
+
+/* Buttons */
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s;
+  border: none;
+  letter-spacing: 1px;
+  font-weight: 400;
+}
+.btn-dl {
+  background: var(--gold);
+  color: #1a1205;
+  font-weight: 700;
+}
+.btn-dl:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-doc {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+.btn-doc:hover { background: var(--dark-light); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* Mobile */
+@media (max-width: 700px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; height: 220px; min-width: unset; }
+  .main { padding: 20px 16px; }
+  .part-card { padding: 18px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-deco">🪷</span>
+  <div>
+    <div class="site-title">語音佛典</div>
+    <div class="site-subtitle">Buddhist Scripture Audio Library</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="🔍 搜尋經文名稱…" oninput="filterScriptures()">
+    </div>
+    <div class="count-bar" id="countBar"></div>
+    <div class="scripture-list" id="scriptureList"></div>
+  </div>
+
+  <!-- Main -->
+  <div class="main" id="main">
+    <div class="welcome">
+      <div class="welcome-lotus">🪷</div>
+      <h2>語音佛典</h2>
+      <p>請從左側選擇經文<br>每部經文均可線上收聽或下載至本機</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ================================================================
+//  經文資料庫
+//  新增經文：在下方陣列加入一個新項目即可
+//  每部經文可以有多個 parts（分段）
+//
+//  audioId : Google Drive 音訊檔案 ID
+//  docId   : Google Docs 文件 ID（可留空 ""）
+// ================================================================
+const scriptures = [
+  {
+    id: 1,
+    title: '五祖 最上乘論',
+    category: '禪宗',
+    parts: [
+      {
+        label: '全文',
+        audioId: '1VtXKrWZdgUP9jMEUQj17ekHxYqqOjMH5',
+        docId:   '1xyEW84N01os0zp1lOn7Lx0a30VWCHJ0_'
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: '三解脫',
+    category: '般若',
+    parts: [
+      {
+        label: '全文',
+        audioId: '1XkT7E1M3f3K-9819It2h1tAzzJ_iAZRy',
+        docId:   '1zQ0RrSeJ61s3vl0G12BRbybwv9bcKJAt'
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: '佛不思議法品',
+    category: '大乘',
+    parts: [
+      {
+        label: '全文',
+        audioId: '140wENdh3jZlg6VLtg9BWWrSRmwycgiCB',
+        docId:   '1Q9RPtCk7XGXgu4onDUmd24B8RumNoLrI'
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: '仁王護國般若波羅蜜經',
+    category: '般若',
+    parts: [
+      {
+        label: '第一部',
+        audioId: '1lheLcV3zh5ee8gRPxK0FBtIKiKK_Z4L1',
+        docId:   '1WQ9VnLT6H3paKV6FzeuyuOtF35jQrReg'
+      },
+      {
+        label: '第二部',
+        audioId: '13rBcIaGNcRO53H2XSRVzZuz0Ru_Qp1mi',
+        docId:   '1QuKP1I82ChKqcVzQpJZzBdeUPnAY8LdU'
+      },
+      {
+        label: '第三部',
+        audioId: '1HJbVQrjNHvkHAYnbjrj36LihFzOx5266',
+        docId:   '1X9lAalX11nwhlZbsKn49T0IQ1VjRprnn'
+      }
+    ]
+  }
+
+  // ── 新增經文範例（刪除前方 // 即可啟用）──
+  // {
+  //   id: 5,
+  //   title: '心經',
+  //   category: '般若',
+  //   parts: [
+  //     {
+  //       label: '全文',
+  //       audioId: '在此填入 Google Drive 檔案 ID',
+  //       docId:   '在此填入 Google Docs 文件 ID'
+  //     }
+  //   ]
+  // },
+];
+
+// ── URL helpers ──
+const previewUrl  = id => `https://drive.google.com/file/d/${id}/preview`;
+const downloadUrl = id => `https://drive.google.com/uc?export=download&id=${id}`;
+const docUrl      = id => `https://docs.google.com/document/d/${id}/preview`;
+
+// ── State ──
+let activeId = null;
+
+// ── Render sidebar ──
+function renderList(items) {
+  const list = document.getElementById('scriptureList');
+  const bar  = document.getElementById('countBar');
+  bar.textContent = `共 ${scriptures.length} 部經文` + (items.length < scriptures.length ? `，顯示 ${items.length} 部` : '');
+
+  if (!items.length) {
+    list.innerHTML = '<div class="no-results">找不到相關經文</div>';
+    return;
+  }
+  list.innerHTML = items.map(s => `
+    <div class="scripture-item ${s.id === activeId ? 'active' : ''}" onclick="showScripture(${s.id})">
+      <span class="item-icon">📖</span>
+      <div>
+        <div class="item-title">${s.title}</div>
+        <div class="item-meta">${s.category}　${s.parts.length > 1 ? s.parts.length + ' 個段落' : '全文'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterScriptures() {
+  const q = document.getElementById('searchInput').value.trim();
+  renderList(q ? scriptures.filter(s => s.title.includes(q) || s.category.includes(q)) : scriptures);
+}
+
+// ── Show scripture ──
+function showScripture(id) {
+  activeId = id;
+  filterScriptures(); // re-render list to update active state
+
+  const s = scriptures.find(x => x.id === id);
+  if (!s) return;
+
+  const partsHTML = s.parts.map(p => `
+    <div class="part-card">
+      ${s.parts.length > 1 ? `<div class="part-label">${p.label}</div>` : ''}
+      <div class="audio-label">🔊 線上收聽</div>
+      <iframe src="${previewUrl(p.audioId)}" width="100%" height="80" allow="autoplay" style="border:none; border-radius:6px;"></iframe>
+      <div class="actions">
+        <a class="btn btn-dl" href="${downloadUrl(p.audioId)}" download>⬇ 下載音訊</a>
+        ${p.docId ? `<a class="btn btn-doc" href="${docUrl(p.docId)}" target="_blank">📄 閱讀經文</a>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="scripture-page">
+      <div class="page-header">
+        <h1>${s.title}</h1>
+        <div class="page-category">分類：${s.category}</div>
+      </div>
+      ${partsHTML}
+    </div>
+  `;
+}
+
+// ── Init ──
+renderList(scriptures);
+</script>
+</body>
+</html>
